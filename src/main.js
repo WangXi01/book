@@ -4,31 +4,51 @@ import Vue from 'vue'
 import App from './App'
 import router from './router'
 import axios from 'axios'
+import VueParticles from 'vue-particles' //粒子效果
+import Vuex from 'vuex'
+import ElementUI from 'element-ui'
+import 'element-ui/lib/theme-chalk/index.css'
+// fade/zoom 等
+import 'element-ui/lib/theme-chalk/base.css';
+import '@/assets/layout.css'
+
+
+Vue.use(Vuex)
+Vue.use(VueParticles)
+Vue.use(ElementUI)
 
 Vue.config.productionTip = false
 Vue.prototype.$http = axios
-//Vue.prototype.$host = 'http://39.108.168.151'
-Vue.prototype.$host = 'http://localhost:8080'
+Vue.prototype.$host = 'http://39.108.168.151:3000'
+//Vue.prototype.$host = 'http://localhost:8080'
 
-//router.beforeEach((to, from, next) => {
-//	var toRouter = to.path;
-//	var nowRouter = window.location.href;
-//	console.log(window.location.href)
-//	return false;
-//	if(nowRouter.indexOf('/#')=='-1'){
-//		
-//		toRouter = 'http://localhost:8080/#'+ toRouter;
-//		next(toRouter)
-//	}else{
-//		
-//		next()
-//	}
-//})
+const store = new Vuex.Store({
+	  state: {
+	    name: ''
+	  },
+	  mutations: {
+	    increment (state,name) {
+	      state.name = name
+	    }
+	  }
+	})
+
+router.beforeEach((to, from, next) => {
+  /* 路由发生变化修改页面title */
+  if (to.meta.title) {
+    document.title = to.meta.title
+  }
+  next()
+})
 
 /* eslint-disable no-new */
 new Vue({
   el: '#app',
+  data:{
+  	bus:new Vue()
+  },
   router,
+  store,
   template: '<App/>',
   components: { App }
 })

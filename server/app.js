@@ -15,9 +15,14 @@ var $sql = require('./db/sqlMap');
 
 app.use(bodyParser.urlencoded({extended:false}));
 app.use(bodyParser.json());
-var conn = mysql.createConnection(models.mysql);
+var conn = mysql.createPool(models.mysql);
 
-conn.connect();
+app.use('/', function(req, res, next) {
+	res.header('Access-Control-Allow-Origin', '*');
+	res.header('Access-Control-Allow-Headers', 'Content-Type, Content-Length, Authorization, Accept, X-Requested-With , yourHeaderFeild');
+	res.header('Access-Control-Allow-Methods', 'PUT, POST, GET, DELETE, OPTIONS');
+	next();
+});
 
 let total = 0 //总章节数
 let id = 745331 //计数器
@@ -100,7 +105,7 @@ function main(url){
 				results.forEach(function(index){
 					console.log('进入'+index.title)
 					saveContent(index)
-					var sql = 'insert into bookContent(id, bookName, title,content, titleLink) values (0, ?, ?, ?, ?)'
+					var sql = 'insert into bookcontent(id, bookName, title,content, titleLink) values (0, ?, ?, ?, ?)'
 					conn.query(sql,[index.bookName,index.title,index.content,index.titleLink],function(err, result) {
 						if(err) {
 							console.log(err);
@@ -128,7 +133,17 @@ function saveContent(obj) {
 }
 
 app.get('/selectBook',(req,res)=>{
-	var sql = `select * from bookContent where titleLink='${req.query.bookLink}'`
+	console.log(req.query.initPage,req.query.pageSize)
+	if(req.query.bookName && !req.query.bookLink && !req.query.pageSize){//列表
+		console.log('1')
+		var sql = `select id from bookcontent where bookName='${req.query.bookName}'`
+	}else if(req.query.bookLink && !req.query.bookName){//正文
+		console.log('2')
+		var sql = `select bookName,title,content from bookcontent where id='${req.query.bookLink}'`
+	}else if(req.query.bookName && req.query.pageSize){
+		console.log('3')
+		var sql = `select id,title from bookcontent where bookName='${req.query.bookName}' Limit ${req.query.initPage},${req.query.pageSize}`
+	}
 	conn.query(sql,function(err, result) {
 		if(err) {
 			console.log(err);
