@@ -24,10 +24,11 @@ app.use('/', function(req, res, next) {
 	next();
 });
 
-let total = 0 //总章节数
-let id = 745331 //计数器
-const chapters = 1187 //爬取多少章
-const url = 'http://www.zwdu.com/book/8634/'
+//let total = 0 //总章节数
+var titleNum = 0
+let id = 10167795 //计数器
+//const chapters = 1272 //爬取多少章
+const url = 'https://www.zwdu.com/book/28215/' 
 
 //去除前后空格和&nbsp;转义字符
 function trim(str) {
@@ -42,7 +43,7 @@ function reconvert(str) {
 	return str
 }
 
-function fetchUrl(url, callback, id,titleLink) {
+function fetchUrl(url, callback,titleLink) {
 	superagent.get(url)
 		.charset('gbk')
 		.end(function(err, res) {
@@ -60,16 +61,22 @@ function fetchUrl(url, callback, id,titleLink) {
 				newArr = newArr + index + '<br>';
 			})
 			var titleLink = url.match(/\/(\w+).html/)[1];
-//			console.log(titleLink)
+			titleNum++
+			console.log('当前第'+titleNum+'章',$('.bottem1 a').eq(2).attr('href')) 
+			var nextElement = $('.bottem1 a').eq(2).attr('href').match(/\/(\w+).html/);
+			if(nextElement == null){
+				var nextLink = null;
+			}else{
+				var nextLink = nextElement[1];
+			}
 			const obj = {
-				id: id,
+				nextLink: nextLink,
 				titleLink:titleLink,
 				err: 0,
 				bookName: $('.footer_cont a').text(),
 				title: $('.bookname h1').text(),
 				content: newArr
 			}
-			
 			callback(null, obj)
 		})
 }
@@ -79,14 +86,13 @@ function main(url){
 		.charset('gbk')
 		.end(function(err, res) {
 			var $ = cheerio.load(res.text);
-			let urls = []
-			total = $('#list dd').length
-			console.log(`共${$('#list dd').length}章`)
+			let urls = [];
+			const chapters = $('#list dd').length;
+			console.log(`共${$('#list dd').length}章`);
 			var html = $('#list dl').html();
 			var new_html = html.toString().replace(/(href)=(\")(\/)/g,function($0,$1,$2,$3){
-				return $1 + '=' + $2 + '/#' + $3;
+				return $1 + '=' + $2 + '/#' + $3; //hash路由拼接
 			})
-			
 			var titleLink;
 			$('#list dd').each(function(i, v) {
 				if(i < chapters) {
@@ -95,55 +101,121 @@ function main(url){
 				
 			})
 			async.mapLimit(urls, 10, function(url, callback) {
-				fetchUrl(url, callback, id,titleLink) 
+				fetchUrl(url, callback,titleLink)
 			}, function(err, results) {
-				//写入json文件
-				fs.writeFile(`../static/data/${results[0].bookName}/list.json`, JSON.stringify(new_html), 'utf-8', err => {
-					if(err) throw err
-				})
-				
+				var sql = 'insert into bookcontent(id, bookName, title,content, titleLink, nextLink) values (0, ?, ?, ?, ?, ?)'
 				results.forEach(function(index){
-					console.log('进入'+index.title)
-					saveContent(index)
-					var sql = 'insert into bookcontent(id, bookName, title,content, titleLink) values (0, ?, ?, ?, ?)'
-					conn.query(sql,[index.bookName,index.title,index.content,index.titleLink],function(err, result) {
+					var selectSql = `select id from bookcontent where title='${index.titleLink}' and bookName='${index.bookName}'`
+					conn.query(selectSql,function(err, result) {
 						if(err) {
 							console.log(err);
 						}
 						if(result) {
-							console.log(index.title + '------成功')
+							if(result.length!=0){
+								console.log(index.bookName+'的'+index.titleLink + '------已存在')
+							}else{
+								conn.query(sql,[index.bookName,index.title,index.content,index.titleLink,index.nextLink],function(err, result) {
+									if(err) {
+										console.log(err);
+									}
+									if(result) {
+										console.log(index.title + '------写入数据库成功')
+									}
+								})
+							}
 						}
 					})
+					
+					
 				})
 			})
 		})
 }
  
 //main(url)
-
-function saveContent(obj) {
-	//判断书名文件夹是否存在，不存在则创建
-	if(!fs.existsSync(`../static/data/${obj.bookName}`)) {
-		fs.mkdirSync(`../static/data/${obj.bookName}`)
-	}
-	//写入json文件
-	fs.writeFile(`../static/data/${obj.bookName}/chapter${obj.titleLink}.json`, JSON.stringify(obj), 'utf-8', err => {
-		if(err) throw err
-	})
+//getBook(url)
+function getBook(url){
+	superagent.get(url)
+		.charset('gbk')
+		.end(function(err, res) {
+			var $ = cheerio.load(res.text);
+			let urls = []
+			var hotcontent = $('#hotcontent .item');
+			
+			var sql = 'insert into bookauthor(id, title, author, intro, link) values (0, ?, ?, ?, ?)'
+			
+			hotcontent.each(function(i,v){
+				var bookTitle = $(v).find('dl').find('a').text()
+				var info = $(v).find('dl').find('span').text();
+				var intro = $(v).find('dl').find('dd').text().replace(/(&nbsp;)|(\s)/g, '');
+				if(intro.length>50){ //截取简介
+					intro = intro.substring(0,32)+'...'
+				}
+				var bookLink = $(v).find('img').attr('src');
+				if(!bookLink.match(/https/g)){ //分类下图片link缺少base网址的处理
+					var bookLink = 'https://www.zwdu.com' + bookLink; 
+				}
+				var selectSql = `select id from bookauthor where title='${bookTitle}'`
+				conn.query(selectSql,function(err, result) {
+					if(err) {
+						console.log(err);
+					}
+					if(result) {
+						if(result.length!=0){
+							console.log(bookTitle + '------已存在')
+						}else{
+							conn.query(sql,[bookTitle,info,intro,bookLink],function(err, result) {
+								if(err) {
+									console.log(err);
+								}
+								if(result) {
+									console.log(bookTitle + '------成功')
+								}
+							})
+						}
+					}
+				})
+				
+				
+			})
+			
+		})
 }
 
+//function saveContent(obj) {
+//	//判断书名文件夹是否存在，不存在则创建
+//	if(!fs.existsSync(`../static/data/${obj.bookName}`)) {
+//		fs.mkdirSync(`../static/data/${obj.bookName}`)
+//	}
+//	//写入json文件
+//	fs.writeFile(`../static/data/${obj.bookName}/chapter${obj.titleLink}.json`, JSON.stringify(obj), 'utf-8', err => {
+//		if(err) throw err
+//	})
+//}
+
 app.get('/selectBook',(req,res)=>{
-	console.log(req.query.initPage,req.query.pageSize)
 	if(req.query.bookName && !req.query.bookLink && !req.query.pageSize){//列表
 		console.log('1')
-		var sql = `select id from bookcontent where bookName='${req.query.bookName}'`
+		var sql = `select id from bookcontent where bookName='${req.query.bookName}' order by titleLink`
 	}else if(req.query.bookLink && !req.query.bookName){//正文
 		console.log('2')
-		var sql = `select bookName,title,content from bookcontent where id='${req.query.bookLink}'`
+		var sql = `select bookName,title,content,nextLink from bookcontent where titleLink='${req.query.bookLink}'`
 	}else if(req.query.bookName && req.query.pageSize){
 		console.log('3')
-		var sql = `select id,title from bookcontent where bookName='${req.query.bookName}' Limit ${req.query.initPage},${req.query.pageSize}`
+		var sql = `select titleLink,title from bookcontent where bookName='${req.query.bookName}'  order by titleLink Limit ${req.query.initPage},${req.query.pageSize}`
 	}
+	conn.query(sql,function(err, result) {
+		if(err) {
+			console.log(err);
+		}
+		if(result) {
+			res.json(result);
+		}
+	})
+})
+
+app.get('/homebook',(req,res)=>{
+	var sql = `select * from bookauthor`
 	conn.query(sql,function(err, result) {
 		if(err) {
 			console.log(err);

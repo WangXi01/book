@@ -1,8 +1,14 @@
 module.exports = {
+//	mysql: {
+//		host: '39.108.168.151',
+//		user: 'root',
+//		password: '123456',
+//		database: '20171211'
+//	}
 	mysql: {
-		host: '39.108.168.151',
+		host: 'localhost',
 		user: 'root',
-		password: '123456',
+		password: 'pass123',
 		database: '20171211'
 	}
 }

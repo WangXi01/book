@@ -13,7 +13,7 @@
 				<div class="title">{{this.$route.query.name}}</div>
 				<dl v-for="item in listTitle">
 					<dd>
-						<router-link :to="'/book/'+item.id">{{item.title}}</router-link>
+						<router-link :to="'/book/'+item.titleLink">{{item.title}}</router-link>
 					</dd>
 				</dl>
 				<div style="clear:both"></div>
@@ -52,6 +52,7 @@
 		},
 		methods: {
 			init() {
+				this.showLoading = true;
 				this.$http.get(this.$host+'/selectBook', {
 					params: {
 						bookName: this.$route.query.name,
@@ -59,10 +60,10 @@
 						pageSize: this.pageSize[this.pageSizeIndex],
 					}
 				}).then((res, err) => {
-					console.log(res,1111)
-					var listTitle = res.data;
-					this.listTitle = listTitle;
+					this.showLoading = false;
+					this.listTitle = res.data;
 				}).catch(err => {
+					this.showLoading = false;
 					this.$notify.error({
 						title: '错误',
 						message: '抱歉，无法找到此小说'
@@ -73,7 +74,6 @@
 						bookName: this.$route.query.name
 					}
 				}).then((res, err) => {
-					console.log(res,22222)
 					if(!res.data.length){
 						this.msg = '抱歉，无法找到此小说'
 						this.$notify.error({
@@ -103,7 +103,6 @@
 						pageSize: this.pageSize[this.pageSizeIndex],
 					}
 				}).then((res, err) => {
-					console.log(res)
 					var listTitle = res.data;
 					this.listTitle = listTitle;
 					this.showLoading = false;
@@ -126,7 +125,6 @@
 						pageSize: this.pageSize[this.pageSizeIndex],
 					}
 				}).then((res, err) => {
-					console.log(res)
 					var listTitle = res.data;
 					this.listTitle = listTitle;
 					this.showLoading = false;
@@ -145,60 +143,3 @@
 		}
 	}
 </script>
-
-<style scoped>
-	#list {
-		width: 80%;
-		margin: 10px auto;
-	}
-	
-	#list dl {
-		width: 100%;
-	}
-	
-	#list dl dd {
-		width: 29%;
-		height: 40px;
-		line-height: 40px;
-		float: left;
-		border-top: 1px solid #eee;
-		overflow: hidden;
-		white-space: nowrap;
-	}
-	
-	#list dd a {
-		color: #000;
-		text-decoration: none;
-		font-size: 14px;
-		transition: all 0.3s;
-	}
-	
-	#list dd:hover a {
-		color: #369;
-		text-decoration: underline;
-		margin-left: 5px;
-	}
-	
-	#list .title {
-		font-size: 18px;
-		font-weight: bold;
-		text-align: center;
-		vertical-align: middle;
-		width: 98%;
-		margin: 30px auto;
-		padding: 5px 10px;
-	}
-	
-	.pagination {
-		margin: 20px 40px;
-		text-align: right;
-	}
-	
-	@media only screen and (max-width: 767px) {
-		#list dl dd {
-			width: 100%;
-			text-align: left;
-			margin: 0;
-		}
-	}
-</style>

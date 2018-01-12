@@ -10,14 +10,12 @@
 		</div>
 		<div class="bookName">{{bookName}}</div>
 		<div class="toNext">
-			<router-link :to="'/book/'+(parseInt(this.$route.params.id)-1)">上一章</router-link>
-			<router-link :to="'/book/'+(parseInt(this.$route.params.id)+1)">下一章</router-link>
+			<router-link :to="'/book/'+nextLink">下一章</router-link>
 		</div>
 		<div class="bookTitle">{{bookTitle}}</div>
 		<div v-html="bookContent" class="bookContent"></div>
 		<div class="toNext">
-			<router-link :to="'/book/'+(parseInt(this.$route.params.id)-1)">上一章</router-link>
-			<router-link :to="'/book/'+(parseInt(this.$route.params.id)+1)">下一章</router-link>
+			<router-link :to="'/book/'+nextLink">下一章</router-link>
 		</div>
 	</div>
 </template>
@@ -31,8 +29,8 @@
 				bookName: '',
 				bookTitle: '',
 				bookContent: '',
+				nextLink:'',
 				showLoading: true,
-				chapter:20000,
 			}
 		},
 		mounted: function() {
@@ -54,7 +52,7 @@
 						bookLink: this.$route.params.id
 					}
 				}).then((res, err) => {
-					if(!res.data.length){
+					if(!res.data[0].nextLink){
 						this.$router.push('/home');
 						this.$notify.error({
 							title: '错误',
@@ -63,11 +61,10 @@
 						this.showLoading = false;
 						return false;
 					}
-					console.log(res)
 					this.bookName = res.data[0].bookName;
 					this.bookTitle = res.data[0].title;
 					this.bookContent = res.data[0].content;
-					this.chapter = res.data.length;
+					this.nextLink = res.data[0].nextLink;
 					this.showLoading = false;
 				})
 

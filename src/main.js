@@ -11,7 +11,7 @@ import 'element-ui/lib/theme-chalk/index.css'
 // fade/zoom 等
 import 'element-ui/lib/theme-chalk/base.css';
 import '@/assets/layout.css'
-
+import '@/assets/media.css'
 
 Vue.use(Vuex)
 Vue.use(VueParticles)

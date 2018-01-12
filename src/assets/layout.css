@@ -1,3 +1,109 @@
+/*app.vue*/
+#app {
+  font-family: 'Avenir', Helvetica, Arial, sans-serif;
+  font-size: 12px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-align: center;
+  color: #2c3e50;
+  overflow: hidden;
+  min-height: 100%;
+  width: 100%;
+}
+#particles-js canvas{
+	position: fixed;
+	left: 0;
+	top: 0;
+	z-index: -1;
+}
+.tools-list{
+	position: fixed;
+	top: 50%;
+	margin-top: -90px;
+	right: 3%;
+	width: 50px;
+}
+
+@keyframes mymove  
+{  
+ 	0% {  
+    background-position: 0% 0%; 
+  }  
+  50% {  
+    background-position: 50% 100%; 
+  }  
+  100% {  
+     background-position: 100% 0%; 
+  }  
+}  
+    
+.tools-list i{
+	display: block;
+	font-size: 20px;
+	color: #000;
+	width: 100%;
+	height: 60px;
+	line-height: 60px;
+	transition: all 0.5s;
+	margin-top: 20px;
+	background: linear-gradient(90deg,#AFEEEE,#C71585,#8B008B,#E6E6FA,#FFFF00,#7FFFD4,#2E8B57);  /*渐变*/
+	background-size:1400% 300%;  
+	animation:mymove 7s ease infinite;  
+}
+.tools-list i:hover{
+	cursor: pointer;
+	transform: rotateZ(180deg);
+}
+
+/*list*/
+#list {
+		width: 80%;
+		margin: 10px auto;
+	}
+	
+	#list dl {
+		width: 100%;
+	}
+	
+	#list dl dd {
+		width: 29%;
+		height: 40px;
+		line-height: 40px;
+		float: left;
+		border-top: 1px solid #eee;
+		overflow: hidden;
+		white-space: nowrap;
+	}
+	
+	#list dd a {
+		color: #000;
+		text-decoration: none;
+		font-size: 14px;
+		transition: all 0.3s;
+	}
+	
+	#list dd:hover a {
+		color: #369;
+		text-decoration: underline;
+		margin-left: 5px;
+	}
+	
+	#list .title {
+		font-size: 18px;
+		font-weight: bold;
+		text-align: center;
+		vertical-align: middle;
+		width: 98%;
+		margin: 30px auto;
+		padding: 5px 10px;
+	}
+	
+	.pagination {
+		margin: 20px 40px;
+		text-align: right;
+	}
+
+/*content*/
 .bookBorder {
 	width: 70%;
 	margin: 0 auto;
@@ -5,9 +111,7 @@
 	padding: 50px;
 	text-align: left;
 }
-@media only screen and (max-width: 767px) {
-	.bookBorder{width: calc(100% - 42px);padding: 20px;}
-}
+
 .bookContent {
 	font-size: 20px;
 	font-family: "宋体", Arial, Helvetica;
@@ -55,7 +159,7 @@
 }
 
 .toNext {
-	margin: 10px 0;
+	margin: 20px 0;
 	text-align: center;
 }
 
