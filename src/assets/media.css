@@ -1,6 +1,9 @@
 /*mobile*/
 @media only screen and (max-width: 767px) {
+	.hideMb{display: none !important;}
 	.tools-list{right: 1%;width: 40px;}
-	.bookBorder{width: calc(100% - 42px);padding: 20px;}
+	#app .bookBorder{width: calc(100% - 42px);padding: 20px;border: none;}
 	#list dl dd{width: 100%;text-align: left;margin: 0;}
+	.item{padding: 15px;}
+	.el-breadcrumb{margin: 20px 0;line-height: 25px;}
 }

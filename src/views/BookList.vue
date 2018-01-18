@@ -7,34 +7,38 @@
 			<div class="transition-box" v-show="show">
 				<el-breadcrumb separator-class="el-icon-arrow-right">
 					<el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
+					<el-breadcrumb-item>
+						<router-link :to='{path:"/list/"+crumbs,query: {item:crumbs,type:listType}}'>{{this.$route.query.type}}</router-link>
+					</el-breadcrumb-item>
 					<el-breadcrumb-item>{{this.$route.query.name}}</el-breadcrumb-item>
 				</el-breadcrumb>
 				<div>{{msg}}</div>
 				<div class="title">{{this.$route.query.name}}</div>
-				<dl v-for="item in listTitle">
-					<dd>
-						<router-link :to="'/book/'+item.titleLink">{{item.title}}</router-link>
+				<dl>
+					<dd v-for="item in listTitle">
+						<router-link :to='{path:"/book/"+item.titleLink,query: {item:crumbs,type:listType}}'>{{item.title}}</router-link>
 					</dd>
+					<div style="clear:both"></div>
 				</dl>
-				<div style="clear:both"></div>
+				
 				<div class="pagination">
 					<el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="currentPage" :page-sizes="pageSize" :page-size="100" layout="total, sizes, prev, pager, next, jumper" :total="total">
 					</el-pagination>
 				</div>
 			</div>
 		</transition>
-		<home-footer></home-footer>
 	</div>
 </template>
 
 <script>
-	import HomeFooter from '@/components/Footer'
 	import vueLoading from 'vue-loading-template'
 	export default {
 		name: 'book-list',
 		data() {
 			return {
 				listTitle: [],
+				crumbs:'',
+				listType:'',//面包屑
 				msg: '',
 				show: false,
 				currentPage: 1,
@@ -52,6 +56,7 @@
 		},
 		methods: {
 			init() {
+				this.listType = this.$route.query.type;
 				this.showLoading = true;
 				this.$http.get(this.$host+'/selectBook', {
 					params: {
@@ -62,6 +67,7 @@
 				}).then((res, err) => {
 					this.showLoading = false;
 					this.listTitle = res.data;
+					this.crumbs = this.$getNum(this.$route.query.type);
 				}).catch(err => {
 					this.showLoading = false;
 					this.$notify.error({
@@ -71,7 +77,7 @@
 				})
 				this.$http.get(this.$host+'/selectBook', {
 					params: {
-						bookName: this.$route.query.name
+						bookName: this.$route.query.name,
 					}
 				}).then((res, err) => {
 					if(!res.data.length){
@@ -138,7 +144,6 @@
 			}
 		},
 		components: {
-			HomeFooter,
 			vueLoading
 		}
 	}

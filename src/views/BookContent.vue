@@ -2,7 +2,10 @@
 	<div class="bookBorder">
 		<el-breadcrumb separator-class="el-icon-arrow-right">
 			<el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
-			<el-breadcrumb-item :to="{path:'/list',query: {name: bookName}}">{{bookName}}</el-breadcrumb-item>
+			<el-breadcrumb-item>
+				<router-link :to="{path:'/list/'+crumbs,query: {name: bookName,type:listType}}">{{this.$route.query.type}}</router-link>
+			</el-breadcrumb-item>
+			<el-breadcrumb-item :to="{path:'/list',query: {name: bookName,type:listType}}">{{bookName}}</el-breadcrumb-item>
 			<el-breadcrumb-item>{{bookTitle}}</el-breadcrumb-item>
 		</el-breadcrumb>
 		<div class="loadingMask" v-show="showLoading">
@@ -31,6 +34,9 @@
 				bookContent: '',
 				nextLink:'',
 				showLoading: true,
+				typeList:'',
+				crumbs:'',
+				listType:'',
 			}
 		},
 		mounted: function() {
@@ -44,6 +50,8 @@
 		},
 		methods: {
 			init() {
+				this.listType = this.$route.query.type;
+				this.crumbs = this.$getNum(this.$route.query.type);
 				document.body.scrollTop = 0;
 				document.documentElement.scrollTop = 0;
 				this.showLoading = true;

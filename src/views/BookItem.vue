@@ -1,5 +1,5 @@
 <template>
-	<div id="home">
+	<div id="item">
 		<el-row :gutter="20">
 			<div v-for="item in bookName">
 				<router-link :to="{path:'/list',query: {name: item.title,type: item.type}}">
@@ -42,18 +42,23 @@
 				this.init()
 			})
 		},
+		watch: {
+			'$route': ['init']
+		},
 		methods: {
 			init(){
 				this.bookName = []
-				this.$http.get(this.$host+'/homebook').then((res, err) => {
-					console.log(res)
-					this.bookName = res.data;
-				}).catch(err => {
-					this.$notify.error({
-						title: '错误',
-						message: '抱歉，无法找到此小说'
-					});
-				})
+				var item = this.$getItem(this.$route.params.id);
+				if(item){
+					this.$http.get(this.$host+'/selectBook',{params:{item:item}}).then((res, err) => {
+						this.bookName = res.data;
+					}).catch(err => {
+						this.$notify.error({
+							title: '错误',
+							message: '抱歉，无法找到此小说'
+						});
+					})
+				}
 			}
 		}
 	}

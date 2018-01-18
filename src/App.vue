@@ -1,15 +1,19 @@
 <template>
   <div id="app">
   	<vue-particles color="#E940FF" :particleOpacity="0.4"></vue-particles>
-    <router-view/>
-    <div class="tools-list">
+  	<home-header></home-header>
+    <router-view class='app-content' />
+    <div class="tools-list hideMb">
     	<i class="el-icon-arrow-up" @click="toTop()" @mouseenter="toTopSlot(true)" @mouseleave="toTopSlot(false)"></i>
     	<i class="el-icon-arrow-down"  @click="toBottom()" @mouseenter="toBottomSlot(true)" @mouseleave="toBottomSlot(false)"></i>
     </div>
+    <home-footer></home-footer>
   </div>
 </template>
 
 <script>
+import HomeFooter from '@/components/Footer'	
+import HomeHeader from '@/components/Header'
 export default {
   name: 'app',
   data(){
@@ -55,6 +59,10 @@ export default {
   			clearInterval(this.bottomTimer)
   		}
   	}
-  }
+  },
+  components: {
+  	HomeHeader,
+		HomeFooter,
+	}
 }
 </script>

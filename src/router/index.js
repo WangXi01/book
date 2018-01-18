@@ -3,6 +3,7 @@ import Router from 'vue-router'
 import BookList from '@/views/BookList'
 import BookContent from '@/views/BookContent'
 import Home from '@/views/Home'
+import BookItem from '@/views/BookItem'
 
 Vue.use(Router)
 
@@ -25,7 +26,7 @@ export default new Router({
       name: 'BookContent',
       component: BookContent,
       meta: {
-        title: '小说列表页'
+        title: '小说内容'
       }
     },
     {
@@ -34,6 +35,14 @@ export default new Router({
       component: BookList,
       meta: {
         title: '小说列表'
+      }
+    },
+    {
+      path: '/list/:id',
+      name: 'item',
+      component: BookItem,
+      meta: {
+        title: '小说分类'
       }
     }
   ]

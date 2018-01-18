@@ -12,6 +12,7 @@ import 'element-ui/lib/theme-chalk/index.css'
 import 'element-ui/lib/theme-chalk/base.css';
 import '@/assets/layout.css'
 import '@/assets/media.css'
+import {getItem,getNum} from '@/libs/items'  //小说分类
 
 Vue.use(Vuex)
 Vue.use(VueParticles)
@@ -19,8 +20,10 @@ Vue.use(ElementUI)
 
 Vue.config.productionTip = false
 Vue.prototype.$http = axios
-Vue.prototype.$host = 'http://39.108.168.151:3000'
-//Vue.prototype.$host = 'http://localhost:8080'
+Vue.prototype.$getItem = getItem
+Vue.prototype.$getNum = getNum
+//Vue.prototype.$host = 'http://39.108.168.151:3000'
+Vue.prototype.$host = 'http://localhost:8080'
 
 const store = new Vuex.Store({
 	  state: {

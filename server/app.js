@@ -8,6 +8,7 @@ const fs = require('fs');
 const request = require('request');
 const mysql = require('mysql');
 const bodyParser = require('body-parser')
+const memoryCache = require('memory-cache');
 
 
 var models = require('./db/db');
@@ -24,11 +25,23 @@ app.use('/', function(req, res, next) {
 	next();
 });
 
-//let total = 0 //总章节数
-var titleNum = 0
+var titleNum = 0 //初始章节
 let id = 10167795 //计数器
-//const chapters = 1272 //爬取多少章
-const url = 'https://www.zwdu.com/book/28215/' 
+const url = 'https://www.zwdu.com/book/26906/' 
+var linkArr =  ["https://www.zwdu.com/book/31392/", "https://www.zwdu.com/book/31391/", "https://www.zwdu.com/book/31390/", "https://www.zwdu.com/book/31379/", "https://www.zwdu.com/book/31343/", "https://www.zwdu.com/book/31294/", "https://www.zwdu.com/book/31249/", "https://www.zwdu.com/book/31205/", "https://www.zwdu.com/book/31197/", "https://www.zwdu.com/book/31179/", "https://www.zwdu.com/book/31122/", "https://www.zwdu.com/book/31044/", "https://www.zwdu.com/book/31036/", "https://www.zwdu.com/book/30971/", "https://www.zwdu.com/book/30803/", "https://www.zwdu.com/book/30797/", "https://www.zwdu.com/book/30722/", "https://www.zwdu.com/book/30666/", "https://www.zwdu.com/book/30614/", "https://www.zwdu.com/book/30587/", "https://www.zwdu.com/book/30505/", "https://www.zwdu.com/book/30499/", "https://www.zwdu.com/book/30486/", "https://www.zwdu.com/book/30477/", "https://www.zwdu.com/book/30458/", "https://www.zwdu.com/book/30416/", "https://www.zwdu.com/book/30362/", "https://www.zwdu.com/book/30345/", "https://www.zwdu.com/book/30297/", "https://www.zwdu.com/book/30288/"]
+
+
+
+
+
+//for(let i=0;i<linkArr.length;i++){
+//	setTimeout(function(){
+////		main(linkArr[i])
+////		getBook(linkArr[i])
+//	},1000*3*i)
+//} 
+
+//http://www.biquge.lu/book/35702/
 
 //去除前后空格和&nbsp;转义字符
 function trim(str) {
@@ -47,6 +60,9 @@ function fetchUrl(url, callback,titleLink) {
 	superagent.get(url)
 		.charset('gbk')
 		.end(function(err, res) {
+			if(err){
+				console.log(url)
+			}
 			let $ = cheerio.load(res.text)
 			const arr = []
 			const content = reconvert($("#content").html())
@@ -62,7 +78,7 @@ function fetchUrl(url, callback,titleLink) {
 			})
 			var titleLink = url.match(/\/(\w+).html/)[1];
 			titleNum++
-			console.log('当前第'+titleNum+'章',$('.bottem1 a').eq(2).attr('href')) 
+			console.log('当前url:'+url+',当前第'+titleNum+'章',$('.bottem1 a').eq(2).attr('href')) 
 			var nextElement = $('.bottem1 a').eq(2).attr('href').match(/\/(\w+).html/);
 			if(nextElement == null){
 				var nextLink = null;
@@ -103,9 +119,10 @@ function main(url){
 			async.mapLimit(urls, 10, function(url, callback) {
 				fetchUrl(url, callback,titleLink)
 			}, function(err, results) {
-				var sql = 'insert into bookcontent(id, bookName, title,content, titleLink, nextLink) values (0, ?, ?, ?, ?, ?)'
+				var sql = 'insert into bookcontent(id, bookName, title,content, titleLink, nextLink,type) values (0, ?, ?, ?, ?, ?, ?)';
+				var bookType = '其他小说';
 				results.forEach(function(index){
-					var selectSql = `select id from bookcontent where title='${index.titleLink}' and bookName='${index.bookName}'`
+					var selectSql = `select id from bookcontent where titleLink='${index.titleLink}' and bookName='${index.bookName}'`
 					conn.query(selectSql,function(err, result) {
 						if(err) {
 							console.log(err);
@@ -114,7 +131,7 @@ function main(url){
 							if(result.length!=0){
 								console.log(index.bookName+'的'+index.titleLink + '------已存在')
 							}else{
-								conn.query(sql,[index.bookName,index.title,index.content,index.titleLink,index.nextLink],function(err, result) {
+								conn.query(sql,[index.bookName,index.title,index.content,index.titleLink,index.nextLink,bookType],function(err, result) {
 									if(err) {
 										console.log(err);
 									}
@@ -133,27 +150,30 @@ function main(url){
 }
  
 //main(url)
-//getBook(url)
+//getBook(url) 
 function getBook(url){
 	superagent.get(url)
 		.charset('gbk')
 		.end(function(err, res) {
 			var $ = cheerio.load(res.text);
-			let urls = []
-			var hotcontent = $('#hotcontent .item');
-			
-			var sql = 'insert into bookauthor(id, title, author, intro, link) values (0, ?, ?, ?, ?)'
+//			var hotcontent = $('#hotcontent .item');
+			var hotcontent = $('.box_con').eq(0);
+			var sql = 'insert into bookauthor(id, title, author, intro, link, type) values (0, ?, ?, ?, ?, ?)'
 			
 			hotcontent.each(function(i,v){
-				var bookTitle = $(v).find('dl').find('a').text()
-				var info = $(v).find('dl').find('span').text();
-				var intro = $(v).find('dl').find('dd').text().replace(/(&nbsp;)|(\s)/g, '');
+//				var bookTitle = $(v).find('dl').find('a').text()
+//				var author = $(v).find('dl').find('span').text();
+//				var intro = $(v).find('dl').find('dd').text().replace(/(&nbsp;)|(\s)/g, '');
+				var bookTitle = $(v).find('#info').find('h1').text()
+				var author = $(v).find('#info').find('p').eq(0).text()
+				var intro = $(v).find('#intro').find('p').eq(0).text().replace(/(&nbsp;)|(\s)/g, '');
+				var type = $(v).find('.con_top a').eq(1).text();
 				if(intro.length>50){ //截取简介
 					intro = intro.substring(0,32)+'...'
 				}
 				var bookLink = $(v).find('img').attr('src');
 				if(!bookLink.match(/https/g)){ //分类下图片link缺少base网址的处理
-					var bookLink = 'https://www.zwdu.com' + bookLink; 
+					var bookLink = 'https://www.zwdu.com' + bookLink;
 				}
 				var selectSql = `select id from bookauthor where title='${bookTitle}'`
 				conn.query(selectSql,function(err, result) {
@@ -164,7 +184,7 @@ function getBook(url){
 						if(result.length!=0){
 							console.log(bookTitle + '------已存在')
 						}else{
-							conn.query(sql,[bookTitle,info,intro,bookLink],function(err, result) {
+							conn.query(sql,[bookTitle,author,intro,bookLink,type],function(err, result) {
 								if(err) {
 									console.log(err);
 								}
@@ -194,33 +214,45 @@ function getBook(url){
 //}
 
 app.get('/selectBook',(req,res)=>{
+	console.log(memoryCache.get(req.query.bookName))
+	if(memoryCache.get(req.query.bookName)){
+		res.json(memoryCache.get(req.query.bookName))
+		return false;
+	}
 	if(req.query.bookName && !req.query.bookLink && !req.query.pageSize){//列表
 		console.log('1')
-		var sql = `select id from bookcontent where bookName='${req.query.bookName}' order by titleLink`
+		var sql = `select id from bookcontent where bookName='${req.query.bookName}'`
 	}else if(req.query.bookLink && !req.query.bookName){//正文
 		console.log('2')
 		var sql = `select bookName,title,content,nextLink from bookcontent where titleLink='${req.query.bookLink}'`
 	}else if(req.query.bookName && req.query.pageSize){
 		console.log('3')
 		var sql = `select titleLink,title from bookcontent where bookName='${req.query.bookName}'  order by titleLink Limit ${req.query.initPage},${req.query.pageSize}`
+	}else if(req.query.item){
+		console.log('4')
+		var sql = `select * from bookauthor where type='${req.query.item}'`
 	}
 	conn.query(sql,function(err, result) {
 		if(err) {
 			console.log(err);
 		}
 		if(result) {
+			if(req.query.bookName && req.query.pageSize){
+				memoryCache.put(req.query.bookName,result)
+			}
 			res.json(result);
 		}
 	})
 })
 
 app.get('/homebook',(req,res)=>{
-	var sql = `select * from bookauthor`
+	var sql = `select * from bookauthor ORDER BY RAND() Limit 0,12`;
 	conn.query(sql,function(err, result) {
 		if(err) {
 			console.log(err);
 		}
 		if(result) {
+			memoryCache.put('home',result)
 			res.json(result);
 		}
 	})
