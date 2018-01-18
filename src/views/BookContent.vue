@@ -13,12 +13,12 @@
 		</div>
 		<div class="bookName">{{bookName}}</div>
 		<div class="toNext">
-			<router-link :to="'/book/'+nextLink">下一章</router-link>
+			<router-link :to="{path:'/book/'+nextLink,query: {type:this.$route.query.type}}">下一章</router-link>
 		</div>
 		<div class="bookTitle">{{bookTitle}}</div>
 		<div v-html="bookContent" class="bookContent"></div>
 		<div class="toNext">
-			<router-link :to="'/book/'+nextLink">下一章</router-link>
+			<router-link :to="{path:'/book/'+nextLink,query: {type:this.$route.query.type}}">下一章</router-link>
 		</div>
 	</div>
 </template>

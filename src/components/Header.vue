@@ -47,7 +47,7 @@
 
 <script>
 	export default{
-		name:'header',
+		name:'homeHead',
 		methods:{
 			search(){
 				this.$message.error('不好意思，该功能正在制作中...')

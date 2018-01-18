@@ -7,7 +7,7 @@
 
 <script>
 	export default{
-		name:'foot',
+		name:'homeFoot',
 	}
 </script>
 
