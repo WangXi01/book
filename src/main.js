@@ -5,7 +5,6 @@ import App from './App'
 import router from './router'
 import axios from 'axios'
 import VueParticles from 'vue-particles' //粒子效果
-import Vuex from 'vuex'
 import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
 // fade/zoom 等
@@ -13,28 +12,26 @@ import 'element-ui/lib/theme-chalk/base.css';
 import '@/assets/layout.css'
 import '@/assets/media.css'
 import {getItem,getNum} from '@/libs/items'  //小说分类
+import store from '@/libs/vuex'
 
-Vue.use(Vuex)
 Vue.use(VueParticles)
 Vue.use(ElementUI)
 
+axios.defaults.timeout = 10000
 Vue.config.productionTip = false
 Vue.prototype.$http = axios
 Vue.prototype.$getItem = getItem
 Vue.prototype.$getNum = getNum
-//Vue.prototype.$host = 'http://39.108.168.151:3000'
-Vue.prototype.$host = 'http://localhost:8080'
+Vue.prototype.$store = store
 
-const store = new Vuex.Store({
-	  state: {
-	    name: ''
-	  },
-	  mutations: {
-	    increment (state,name) {
-	      state.name = name
-	    }
-	  }
-	})
+if(process.env.NODE_ENV == 'development'){  //判断环境
+	Vue.prototype.$host = 'http://localhost:8080'
+}else{
+	Vue.prototype.$host = 'http://39.108.168.151:3000'
+}
+
+
+
 
 router.beforeEach((to, from, next) => {
   /* 路由发生变化修改页面title */

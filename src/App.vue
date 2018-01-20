@@ -1,11 +1,12 @@
 <template>
   <div id="app">
-  	<vue-particles color="#E940FF" :particleOpacity="0.4"></vue-particles>
+  	<vue-particles color="#409EFF" :particleOpacity="0.4"></vue-particles>
   	<home-header></home-header>
     <router-view class='app-content' />
-    <div class="tools-list hideMb">
+    <div class="tools-list" :class="{hideMb:isHide}">
     	<i class="el-icon-arrow-up" @click="toTop()" @mouseenter="toTopSlot(true)" @mouseleave="toTopSlot(false)"></i>
     	<i class="el-icon-arrow-down"  @click="toBottom()" @mouseenter="toBottomSlot(true)" @mouseleave="toBottomSlot(false)"></i>
+    	<i class="el-icon-close hidePc" @click="closeTop"></i>
     </div>
     <home-footer></home-footer>
   </div>
@@ -20,6 +21,7 @@ export default {
   	return{
   		topTimer:'',
   		bottomTimer:'',
+  		isHide:false,
   	}
   },
   methods:{
@@ -58,7 +60,25 @@ export default {
   		}else{
   			clearInterval(this.bottomTimer)
   		}
-  	}
+  	},
+  	closeTop() {
+	    this.$confirm('您将隐藏右侧返回顶部按钮, 是否继续?', '提示', {
+	      confirmButtonText: '确定',
+	      cancelButtonText: '取消',
+	      type: 'warning'
+	    }).then(() => {
+	    	this.isHide = true;
+	      this.$message({
+	        type: 'success',
+	        message: '已隐藏!'
+	      });
+	    }).catch(() => {
+	      this.$message({
+	        type: 'info',
+	        message: '已取消隐藏'
+	      });          
+	    });
+	  }
   },
   components: {
   	HomeHeader,

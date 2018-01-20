@@ -42,8 +42,15 @@
 				this.init()
 			})
 		},
+		watch:{
+			$route:['init']
+		},
 		methods: {
 			init(){
+				if(this.$route.query.res){
+					this.bookName = this.$store.state.name;
+					return false;
+				}
 				this.bookName = []
 				this.$http.get(this.$host+'/homebook').then((res, err) => {
 					console.log(res)
@@ -55,6 +62,6 @@
 					});
 				})
 			}
-		}
+		},
 	}
 </script>

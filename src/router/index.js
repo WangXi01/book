@@ -18,7 +18,7 @@ export default new Router({
       name: 'Home',
       component: Home,
       meta: {
-        title: '小说主页,走过路过不要错过啦'
+        title: '山外小楼夜听雨'
       }
     },
     {

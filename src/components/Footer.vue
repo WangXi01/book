@@ -12,6 +12,6 @@
 </script>
 
 <style>
-#footer{background: #ccc;margin-top: 20px;}
-#footer p{font-size: 16px;color: #000;margin: 20px 0;line-height: 20px;}
+#footer{background: #ccc;margin-top: 20px;line-height: 30px;padding: 20px;}
+#footer p{font-size: 16px;color: #000;}
 </style>

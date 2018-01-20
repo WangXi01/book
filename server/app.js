@@ -5,6 +5,7 @@ const superagent = require('superagent')
 require('superagent-charset')(superagent)
 const async = require('async');
 const fs = require('fs');
+const http = require("http");
 const request = require('request');
 const mysql = require('mysql');
 const bodyParser = require('body-parser')
@@ -31,7 +32,26 @@ const url = 'https://www.zwdu.com/book/26906/'
 var linkArr =  ["https://www.zwdu.com/book/31392/", "https://www.zwdu.com/book/31391/", "https://www.zwdu.com/book/31390/", "https://www.zwdu.com/book/31379/", "https://www.zwdu.com/book/31343/", "https://www.zwdu.com/book/31294/", "https://www.zwdu.com/book/31249/", "https://www.zwdu.com/book/31205/", "https://www.zwdu.com/book/31197/", "https://www.zwdu.com/book/31179/", "https://www.zwdu.com/book/31122/", "https://www.zwdu.com/book/31044/", "https://www.zwdu.com/book/31036/", "https://www.zwdu.com/book/30971/", "https://www.zwdu.com/book/30803/", "https://www.zwdu.com/book/30797/", "https://www.zwdu.com/book/30722/", "https://www.zwdu.com/book/30666/", "https://www.zwdu.com/book/30614/", "https://www.zwdu.com/book/30587/", "https://www.zwdu.com/book/30505/", "https://www.zwdu.com/book/30499/", "https://www.zwdu.com/book/30486/", "https://www.zwdu.com/book/30477/", "https://www.zwdu.com/book/30458/", "https://www.zwdu.com/book/30416/", "https://www.zwdu.com/book/30362/", "https://www.zwdu.com/book/30345/", "https://www.zwdu.com/book/30297/", "https://www.zwdu.com/book/30288/"]
 
 
-
+//var imgurl = "http://s0.hao123img.com/res/img/logo/logonew.png";
+//http.get(imgurl, function(res){
+//  var imgData = "";
+//
+//  res.setEncoding("binary"); //一定要设置response的编码为binary否则会下载下来的图片打不开
+//
+//
+//  res.on("data", function(chunk){
+//      imgData+=chunk;
+//  });
+//
+//  res.on("end", function(){
+//      fs.writeFile("../static/img/logonew.png", imgData, "binary", function(err){
+//          if(err){
+//              console.log("down fail");
+//          }
+//          console.log("down success");
+//      });
+//  });
+//});
 
 
 //for(let i=0;i<linkArr.length;i++){
@@ -214,22 +234,17 @@ function getBook(url){
 //}
 
 app.get('/selectBook',(req,res)=>{
-	console.log(memoryCache.get(req.query.bookName))
-	if(memoryCache.get(req.query.bookName)){
-		res.json(memoryCache.get(req.query.bookName))
-		return false;
-	}
+//	if(memoryCache.get(req.query.bookName)){
+//		res.json(memoryCache.get(req.query.bookName))
+//		return false;
+//	}
 	if(req.query.bookName && !req.query.bookLink && !req.query.pageSize){//列表
-		console.log('1')
 		var sql = `select id from bookcontent where bookName='${req.query.bookName}'`
 	}else if(req.query.bookLink && !req.query.bookName){//正文
-		console.log('2')
 		var sql = `select bookName,title,content,nextLink from bookcontent where titleLink='${req.query.bookLink}'`
 	}else if(req.query.bookName && req.query.pageSize){
-		console.log('3')
 		var sql = `select titleLink,title from bookcontent where bookName='${req.query.bookName}'  order by titleLink Limit ${req.query.initPage},${req.query.pageSize}`
 	}else if(req.query.item){
-		console.log('4')
 		var sql = `select * from bookauthor where type='${req.query.item}'`
 	}
 	conn.query(sql,function(err, result) {
@@ -237,9 +252,9 @@ app.get('/selectBook',(req,res)=>{
 			console.log(err);
 		}
 		if(result) {
-			if(req.query.bookName && req.query.pageSize){
-				memoryCache.put(req.query.bookName,result)
-			}
+//			if(req.query.bookName && req.query.pageSize){
+//				memoryCache.put(req.query.bookName,result)
+//			}
 			res.json(result);
 		}
 	})
@@ -256,6 +271,24 @@ app.get('/homebook',(req,res)=>{
 			res.json(result);
 		}
 	})
+})
+
+app.get('/searchBook',(req,res)=>{
+	if(memoryCache.get('searchBook')){
+		res.json(memoryCache.get('searchBook'))
+		return false;
+	}
+	var sql = `select * from bookauthor`;
+	conn.query(sql,function(err, result) {
+		if(err) {
+			console.log(err);
+		}
+		if(result) {
+			memoryCache.put('searchBook',result)
+			res.json(result);
+		}
+	})
+	
 })
 
 app.listen(3000, function() {

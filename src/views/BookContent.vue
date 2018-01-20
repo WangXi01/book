@@ -60,7 +60,7 @@
 						bookLink: this.$route.params.id
 					}
 				}).then((res, err) => {
-					if(!res.data[0].nextLink){
+					if(!res.data[0]){
 						this.$router.push('/home');
 						this.$notify.error({
 							title: '错误',
@@ -74,6 +74,7 @@
 					this.bookContent = res.data[0].content;
 					this.nextLink = res.data[0].nextLink;
 					this.showLoading = false;
+					
 				})
 
 			},

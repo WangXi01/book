@@ -1,9 +1,14 @@
 /*mobile*/
 @media only screen and (max-width: 767px) {
 	.hideMb{display: none !important;}
+	.hidePc{display: block !important;}
 	.tools-list{right: 1%;width: 40px;}
 	#app .bookBorder{width: calc(100% - 42px);padding: 20px;border: none;}
 	#list dl dd{width: 100%;text-align: left;margin: 0;}
 	.item{padding: 15px;}
 	.el-breadcrumb{margin: 20px 0;line-height: 25px;}
+	#app .app-content,#header,.el-message-box{width: 90%;}
+	.pagination{margin: 20px 0;}
+	.pagination .el-pagination{width: 95%;overflow-x: scroll;height: 50px;line-height: 50px;}
+	.header-search-history{left: 60px;width: 70%;}
 }

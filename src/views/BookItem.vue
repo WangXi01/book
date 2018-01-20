@@ -35,6 +35,8 @@
 		data() {
 			return {
 				bookName: [],
+				showLoading:false,
+				showMenu:false,
 			}
 		},
 		mounted(){
@@ -48,6 +50,8 @@
 		methods: {
 			init(){
 				this.bookName = []
+				this.showLoading=false;
+				this.showMenu=false;
 				var item = this.$getItem(this.$route.params.id);
 				if(item){
 					this.$http.get(this.$host+'/selectBook',{params:{item:item}}).then((res, err) => {
